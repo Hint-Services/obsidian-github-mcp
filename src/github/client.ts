@@ -99,23 +99,40 @@ export class GithubClient {
 
         if (searchIn === "filename") {
           // Search for exact filename matches
-          qualifiedQuery = `filename:${query} ${repoQualifier}`;
+          qualifiedQuery = `filename:${
+            query.includes(" ") ? `"${query}"` : query
+          } ${repoQualifier}`;
         } else if (searchIn === "path") {
           // Search anywhere in the file path
-          qualifiedQuery = `path:${query} ${repoQualifier}`;
+          qualifiedQuery = `path:${
+            query.includes(" ") ? `"${query}"` : query
+          } ${repoQualifier}`;
         } else if (searchIn === "content") {
           // Search only in file contents
           qualifiedQuery = `${query} ${repoQualifier}`;
         } else {
-          // "all" - comprehensive search: try multiple approaches
-          // First, if query looks like a filename, search filename and path
-          if (query.includes(" ") || query.includes("/")) {
-            // Multi-word or path-like query - search in content and path
-            qualifiedQuery = `${query} OR path:"${query}" ${repoQualifier}`;
-          } else {
-            // Single term - search filename, path, and content
-            qualifiedQuery = `${query} OR filename:${query} OR path:${query} ${repoQualifier}`;
+          // "all" - comprehensive search: combine content, path, and filename searches.
+          // Each part of the OR query needs its own repo qualifier to scope the search correctly.
+          const terms = [];
+
+          // 1. Content search (broadest)
+          terms.push(query);
+
+          // 2. Path search (quotes if it contains spaces or slashes for exact path segment matching)
+          const pathTerm =
+            query.includes(" ") || query.includes("/") ? `"${query}"` : query;
+          terms.push(`path:${pathTerm}`);
+
+          // 3. Filename search (quotes if it contains spaces for exact filename matching)
+          // Only add filename search if the query doesn't contain a path separator
+          if (!query.includes("/")) {
+            const filenameTerm = query.includes(" ") ? `"${query}"` : query;
+            terms.push(`filename:${filenameTerm}`);
           }
+
+          qualifiedQuery = terms
+            .map((term) => `${term} ${repoQualifier}`)
+            .join(" OR ");
         }
 
         const searchResults = await this.handleRequest(async () => {
