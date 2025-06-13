@@ -28,6 +28,7 @@
     "logs": "tail -n 20 -F ~/Library/Logs/Claude/mcp*.log",
     "clean": "rm -rf build",
     "start": "node build/index.js",
+    "test": "vitest",
     "lint": "biome check ./src",
     "lint:fix": "biome check --apply ./src",
     "format": "biome format ./src",
@@ -46,7 +47,8 @@
     "@biomejs/biome": "1.9.4",
     "@types/node": "^20.11.24",
     "concurrently": "^8.2.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^3.2.3"
   },
   "engines": {
     "node": ">=18.0.0"
