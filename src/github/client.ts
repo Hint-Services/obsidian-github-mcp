@@ -103,36 +103,19 @@ export class GithubClient {
             query.includes(" ") ? `"${query}"` : query
           } ${repoQualifier}`;
         } else if (searchIn === "path") {
-          // Search anywhere in the file path
-          qualifiedQuery = `path:${
-            query.includes(" ") ? `"${query}"` : query
-          } ${repoQualifier}`;
+          // Search anywhere in the file path. The `in:path` qualifier searches for the
+          // query term within the file path.
+          qualifiedQuery = `${query} in:path ${repoQualifier}`;
         } else if (searchIn === "content") {
-          // Search only in file contents
+          // Search only in file contents. This is the default behavior without qualifiers.
           qualifiedQuery = `${query} ${repoQualifier}`;
         } else {
-          // "all" - comprehensive search: combine content, path, and filename searches.
-          // Each part of the OR query needs its own repo qualifier to scope the search correctly.
-          const terms = [];
-
-          // 1. Content search (broadest)
-          terms.push(query);
-
-          // 2. Path search (quotes if it contains spaces or slashes for exact path segment matching)
-          const pathTerm =
-            query.includes(" ") || query.includes("/") ? `"${query}"` : query;
-          terms.push(`path:${pathTerm}`);
-
-          // 3. Filename search (quotes if it contains spaces for exact filename matching)
-          // Only add filename search if the query doesn't contain a path separator
-          if (!query.includes("/")) {
-            const filenameTerm = query.includes(" ") ? `"${query}"` : query;
-            terms.push(`filename:${filenameTerm}`);
-          }
-
-          qualifiedQuery = terms
-            .map((term) => `${term} ${repoQualifier}`)
-            .join(" OR ");
+          // "all" - comprehensive search. The GitHub search API (legacy) does not
+          // support OR operators. The best we can do in a single query is to search
+          // in file content and file path. The `in:file,path` qualifier does this.
+          // This will match the query term if it appears in the content or anywhere
+          // in the full path of a file, which includes the filename.
+          qualifiedQuery = `${query} in:file,path ${repoQualifier}`;
         }
 
         const searchResults = await this.handleRequest(async () => {

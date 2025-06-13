@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GithubClient } from "../../src/github/client";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { GithubConfig } from "../../src/github/types";
@@ -37,62 +37,73 @@ describe("GithubClient searchFiles", () => {
     githubToken: "test-token",
   };
 
-  const server = new McpServer({
-    name: "test-server",
-    version: "1.0.0",
-  });
-  const client = new GithubClient(config);
-  client.registerGithubTools(server);
+  let searchFilesImpl: (args: {
+    query: string;
+    searchIn: string;
+  }) => Promise<void>;
 
-  const searchFilesCall = mockTool.mock.calls.find(
-    (call) => call[0] === "searchFiles"
-  );
-  if (!searchFilesCall) {
-    throw new Error("searchFiles tool not registered");
-  }
-  const searchFilesImpl = searchFilesCall[3];
+  beforeEach(() => {
+    vi.clearAllMocks();
+    const server = new McpServer({
+      name: "test-server",
+      version: "1.0.0",
+    });
+    const client = new GithubClient(config);
+    client.registerGithubTools(server);
 
-  it("should construct the correct query for a multi-word search in 'all' mode", async () => {
+    const searchFilesCall = mockTool.mock.calls.find(
+      (call) => call[0] === "searchFiles"
+    );
+    if (!searchFilesCall) {
+      throw new Error("searchFiles tool not registered");
+    }
+    searchFilesImpl = searchFilesCall[3];
     mockSearchCode.mockResolvedValue({
       data: { total_count: 0, items: [] },
     });
+  });
 
-    const query = "OKR 2025";
-    await searchFilesImpl({ query, searchIn: "all" });
-
+  it("should use `in:file,path` for 'all' search", async () => {
+    await searchFilesImpl({ query: "my query", searchIn: "all" });
     expect(mockSearchCode).toHaveBeenCalledWith(
       expect.objectContaining({
-        q: 'OKR 2025 repo:test-owner/test-repo OR path:"OKR 2025" repo:test-owner/test-repo OR filename:"OKR 2025" repo:test-owner/test-repo',
+        q: "my query in:file,path repo:test-owner/test-repo",
       })
     );
   });
 
-  it("should construct the correct query for a single-word search in 'all' mode", async () => {
-    mockSearchCode.mockResolvedValue({
-      data: { total_count: 0, items: [] },
-    });
-
-    const query = "refactor";
-    await searchFilesImpl({ query, searchIn: "all" });
-
+  it("should use `in:path` for 'path' search", async () => {
+    await searchFilesImpl({ query: "my/path", searchIn: "path" });
     expect(mockSearchCode).toHaveBeenCalledWith(
       expect.objectContaining({
-        q: "refactor repo:test-owner/test-repo OR path:refactor repo:test-owner/test-repo OR filename:refactor repo:test-owner/test-repo",
+        q: "my/path in:path repo:test-owner/test-repo",
       })
     );
   });
 
-  it("should construct the correct query for a path-like search in 'all' mode", async () => {
-    mockSearchCode.mockResolvedValue({
-      data: { total_count: 0, items: [] },
-    });
-
-    const query = "src/components/Button.tsx";
-    await searchFilesImpl({ query, searchIn: "all" });
-
+  it("should use `filename:` for 'filename' search", async () => {
+    await searchFilesImpl({ query: "MyFile.md", searchIn: "filename" });
     expect(mockSearchCode).toHaveBeenCalledWith(
       expect.objectContaining({
-        q: 'src/components/Button.tsx repo:test-owner/test-repo OR path:"src/components/Button.tsx" repo:test-owner/test-repo',
+        q: "filename:MyFile.md repo:test-owner/test-repo",
+      })
+    );
+  });
+
+  it("should quote multi-word filenames", async () => {
+    await searchFilesImpl({ query: "My File.md", searchIn: "filename" });
+    expect(mockSearchCode).toHaveBeenCalledWith(
+      expect.objectContaining({
+        q: 'filename:"My File.md" repo:test-owner/test-repo',
+      })
+    );
+  });
+
+  it("should search only content for 'content' search", async () => {
+    await searchFilesImpl({ query: "some content", searchIn: "content" });
+    expect(mockSearchCode).toHaveBeenCalledWith(
+      expect.objectContaining({
+        q: "some content repo:test-owner/test-repo",
       })
     );
   });
