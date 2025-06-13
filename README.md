@@ -27,7 +27,11 @@ Many Obsidian users store their vaults in GitHub for backup, versioning, and col
 ### Knowledge Base Access
 
 - **getFileContents**: Retrieve the contents of specific notes, documents, or files from your Obsidian vault
-- **searchFiles**: Search for notes and documents within your vault using GitHub's powerful search syntax
+- **searchFiles**: Enhanced search with multiple modes:
+  - `filename`: Find files by exact filename (perfect for "OKR 2025" type searches)
+  - `path`: Search anywhere in file paths 
+  - `content`: Search within file contents
+  - `all`: Comprehensive search across filenames, paths, and content
 
 ### Project Management Integration
 
@@ -122,14 +126,63 @@ Your GitHub token needs the following permissions:
 }
 ```
 
-### Finding Research on a Topic
+### Finding Files by Name (Perfect for "OKR 2025" example!)
 
 ```json
 {
   "tool": "searchFiles",
   "arguments": {
-    "query": "machine learning algorithms in:path",
+    "query": "OKR 2025",
+    "searchIn": "filename"
+  }
+}
+```
+
+### Finding Files by Path
+
+```json
+{
+  "tool": "searchFiles",
+  "arguments": {
+    "query": "Daily Notes",
+    "searchIn": "path"
+  }
+}
+```
+
+### Finding Research on a Topic (Content Search)
+
+```json
+{
+  "tool": "searchFiles",
+  "arguments": {
+    "query": "machine learning algorithms",
+    "searchIn": "content",
     "perPage": 10
+  }
+}
+```
+
+### Comprehensive Search (Filename, Path, and Content)
+
+```json
+{
+  "tool": "searchFiles",
+  "arguments": {
+    "query": "project planning",
+    "searchIn": "all"
+  }
+}
+```
+
+### Advanced GitHub Search Syntax
+
+```json
+{
+  "tool": "searchFiles",
+  "arguments": {
+    "query": "path:*.md extension:md",
+    "searchIn": "content"
   }
 }
 ```
@@ -146,6 +199,50 @@ Your GitHub token needs the following permissions:
   }
 }
 ```
+
+## Search Tips & Troubleshooting
+
+### Can't Find Your File by Name?
+
+**Problem**: Searching for "OKR 2025" doesn't find your file named "OKR 2025.md"
+
+**Solution**: Use the `searchIn: "filename"` parameter:
+
+```json
+{
+  "tool": "searchFiles",
+  "arguments": {
+    "query": "OKR 2025",
+    "searchIn": "filename"
+  }
+}
+```
+
+### Advanced Search Techniques
+
+1. **Exact Phrases**: Use quotes for multi-word searches
+   ```json
+   {
+     "query": "\"project planning 2025\"",
+     "searchIn": "content"
+   }
+   ```
+
+2. **File Extensions**: Find specific file types
+   ```json
+   {
+     "query": "path:*.md",
+     "searchIn": "content"
+   }
+   ```
+
+3. **Directory Specific**: Search within folders
+   ```json
+   {
+     "query": "path:\"Daily Notes/\"",
+     "searchIn": "content"
+   }
+   ```
 
 ## Project Structure
 

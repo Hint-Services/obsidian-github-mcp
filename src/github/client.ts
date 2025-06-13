@@ -63,14 +63,23 @@ export class GithubClient {
       }
     );
 
-    // Placeholder for searchFiles tool
+    // Enhanced searchFiles tool with filename and content search
     server.tool(
       "searchFiles",
-      `Search for notes, documents, and files within your Obsidian vault on GitHub (${this.config.owner}/${this.config.repo}). Find specific knowledge base content using GitHub's powerful search syntax.`,
+      `Search for notes, documents, and files within your Obsidian vault on GitHub (${this.config.owner}/${this.config.repo}). Find specific knowledge base content using GitHub's powerful search syntax. Supports searching in filenames, paths, and content.`,
       {
         query: z
           .string()
-          .describe("Search query (uses GitHub Code Search syntax)"),
+          .describe(
+            "Search query - can be a simple term or use GitHub search qualifiers"
+          ),
+        searchIn: z
+          .enum(["filename", "path", "content", "all"])
+          .optional()
+          .default("all")
+          .describe(
+            "Where to search: 'filename' (exact filename match), 'path' (anywhere in file path), 'content' (file contents), or 'all' (comprehensive search)"
+          ),
         page: z
           .number()
           .optional()
@@ -82,9 +91,33 @@ export class GithubClient {
           .default(100)
           .describe("Number of results per page"),
       },
-      async ({ query, page = 0, perPage = 100 }) => {
+      async ({ query, searchIn = "all", page = 0, perPage = 100 }) => {
         const repoQualifier = `repo:${this.config.owner}/${this.config.repo}`;
-        const qualifiedQuery = `${query} ${repoQualifier}`;
+
+        // Build search query based on searchIn parameter
+        let qualifiedQuery: string;
+
+        if (searchIn === "filename") {
+          // Search for exact filename matches
+          qualifiedQuery = `filename:${query} ${repoQualifier}`;
+        } else if (searchIn === "path") {
+          // Search anywhere in the file path
+          qualifiedQuery = `path:${query} ${repoQualifier}`;
+        } else if (searchIn === "content") {
+          // Search only in file contents
+          qualifiedQuery = `${query} ${repoQualifier}`;
+        } else {
+          // "all" - comprehensive search: try multiple approaches
+          // First, if query looks like a filename, search filename and path
+          if (query.includes(" ") || query.includes("/")) {
+            // Multi-word or path-like query - search in content and path
+            qualifiedQuery = `${query} OR path:"${query}" ${repoQualifier}`;
+          } else {
+            // Single term - search filename, path, and content
+            qualifiedQuery = `${query} OR filename:${query} OR path:${query} ${repoQualifier}`;
+          }
+        }
+
         const searchResults = await this.handleRequest(async () => {
           return this.octokit.search.code({
             q: qualifiedQuery,
@@ -92,16 +125,55 @@ export class GithubClient {
             per_page: perPage,
           });
         });
-        // Format results as a markdown list
+
+        // Enhanced formatting with file sizes and relevance indicators
         const formattedResults = searchResults.items
-          .map((item) => `- "${item.path}"`)
+          .map((item) => {
+            const fileName = item.name;
+            const filePath = item.path;
+            // const score = item.score || 0; // Could be used for relevance ranking in future
+
+            // Determine why this file matched
+            let matchReason = "";
+            if (
+              searchIn === "filename" ||
+              fileName.toLowerCase().includes(query.toLowerCase())
+            ) {
+              matchReason = "📝 filename match";
+            } else if (
+              searchIn === "path" ||
+              filePath.toLowerCase().includes(query.toLowerCase())
+            ) {
+              matchReason = "📁 path match";
+            } else {
+              matchReason = "📄 content match";
+            }
+
+            return `- **${fileName}** (${filePath}) ${matchReason}`;
+          })
           .join("\n");
+
+        let resultText = `Found ${searchResults.total_count} files`;
+        if (searchIn !== "all") {
+          resultText += ` searching in ${searchIn}`;
+        }
+        resultText += `:\n\n${formattedResults}`;
+
+        // Add search tips if no results found
+        if (searchResults.total_count === 0) {
+          resultText += "\n\n💡 **Search Tips:**\n";
+          resultText += `- Try \`searchIn: "filename"\` to search only filenames\n`;
+          resultText += `- Try \`searchIn: "path"\` to search file paths\n`;
+          resultText += `- Try \`searchIn: "content"\` to search file contents\n`;
+          resultText += `- Use quotes for exact phrases: \"OKR 2025\"\n`;
+          resultText += "- Use wildcards: `path:*.md` for markdown files";
+        }
+
         return {
-          // Return formatted text instead of raw JSON string
           content: [
             {
               type: "text",
-              text: `Found ${searchResults.total_count} files:\n${formattedResults}`,
+              text: resultText,
             },
           ],
         };
