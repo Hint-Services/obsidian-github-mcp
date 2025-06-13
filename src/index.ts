@@ -1,14 +1,11 @@
 /**
- * Obsidian GitHub MCP Server
+ * MCP Private GitHub Search Server - DEPRECATED
  *
- * A Model Context Protocol server for accessing GitHub repositories containing Obsidian vaults.
- * This server enables AI assistants to interact with your Obsidian knowledge base stored in GitHub.
+ * ⚠️  DEPRECATION NOTICE: This package has been renamed to 'obsidian-github-mcp'
+ * Please update your configuration to use the new package name.
  *
- * Features:
- * - File content retrieval from Obsidian vaults
- * - Search functionality for notes and documentation
- * - Issue tracking integration
- * - Commit history analysis for knowledge evolution
+ * A Model Context Protocol server for searching private GitHub repositories.
+ * This server provides tools for searching and analyzing GitHub repositories.
  *
  * For more information about MCP, visit:
  * https://modelcontextprotocol.io
@@ -17,6 +14,24 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { GithubClient } from "./github/client.js";
+
+// DEPRECATION WARNING
+console.error(`\n${"=".repeat(80)}`);
+console.error(
+  "⚠️  DEPRECATION NOTICE: 'mcp-private-github-search' has been renamed!"
+);
+console.error("");
+console.error("   This package is deprecated. Please migrate to:");
+console.error("   📦 'obsidian-github-mcp'");
+console.error("");
+console.error("   Installation:");
+console.error("   npm install obsidian-github-mcp");
+console.error("");
+console.error("   Update your MCP configuration to use:");
+console.error("   npx obsidian-github-mcp");
+console.error("");
+console.error("   This deprecated package will be maintained for 6 months.");
+console.error(`${"=".repeat(80)}\n`);
 
 // Read GitHub config from environment variables
 const githubToken = process.env.GITHUB_TOKEN;
@@ -36,8 +51,8 @@ const githubClient = new GithubClient({ githubToken, owner, repo });
  * Create a new MCP server instance with full capabilities
  */
 const server = new McpServer({
-  name: "obsidian-github-mcp",
-  version: "0.2.0",
+  name: "mcp-private-github-search",
+  version: "0.2.1",
   capabilities: {
     tools: {},
     resources: {},

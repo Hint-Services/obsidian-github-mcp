@@ -1,86 +1,36 @@
-[![smithery badge](https://smithery.ai/badge/@Hint-Services/obsidian-github-mcp)](https://smithery.ai/server/@Hint-Services/obsidian-github-mcp)
-[![npm version](https://img.shields.io/npm/v/obsidian-github-mcp)](https://www.npmjs.com/package/obsidian-github-mcp)
+# ⚠️ DEPRECATION NOTICE
 
-# Obsidian GitHub MCP
+This package has been **renamed and moved** to `obsidian-github-mcp`.
 
-A Model Context Protocol (MCP) server that connects AI assistants to GitHub repositories containing Obsidian vaults. This server enables seamless integration with your knowledge base stored on GitHub, allowing AI assistants to read, search, and analyze your Obsidian notes and documentation.
+## 🚀 Migrate to the New Package
 
-## Why This Tool?
-
-Many Obsidian users store their vaults in GitHub for backup, versioning, and collaboration. This MCP server bridges the gap between your GitHub-hosted Obsidian vault and AI assistants, enabling:
-
-- **Knowledge Base Access**: Retrieve specific notes and documents from your Obsidian vault
-- **Intelligent Search**: Find relevant content across your entire knowledge base
-- **Evolution Tracking**: See how your ideas and notes have developed over time
-- **Task Integration**: Connect with issues and project management workflows
-
-## Features
-
-- **GitHub Repository Access**: Connect to any GitHub repository containing your Obsidian vault
-- **Type-Safe Implementation**: Written in TypeScript with comprehensive type definitions
-- **Input Validation**: Robust validation for all API inputs using Zod schemas
-- **Error Handling**: Graceful error handling with informative messages
-- **MCP Integration**: Full compatibility with Claude, Cursor, Windsurf, Cline, and other MCP hosts
-
-## Available Tools
-
-### Knowledge Base Access
-
-- **getFileContents**: Retrieve the contents of specific notes, documents, or files from your Obsidian vault
-- **searchFiles**: Search for notes and documents within your vault using GitHub's powerful search syntax
-
-### Project Management Integration
-
-- **searchIssues**: Search for issues and discussions related to your knowledge base projects
-- **getCommitHistory**: Track how your knowledge base has evolved over time with detailed commit history and diffs
-
-## Use Cases
-
-### For Knowledge Workers
-- **Research Assistant**: AI can access your research notes and reference materials
-- **Writing Support**: Pull relevant background information from your knowledge base
-- **Idea Development**: Track how concepts have evolved across your notes
-
-### For Developers
-- **Documentation Access**: Retrieve project documentation and technical notes
-- **Learning Journals**: Access your learning notes and code examples
-- **Project Planning**: Integrate with GitHub issues for comprehensive project management
-
-### For Students & Academics
-- **Study Materials**: Access lecture notes and study guides
-- **Research Papers**: Retrieve research notes and citations
-- **Collaboration**: Work with shared knowledge bases stored in GitHub
-
-## Installation
-
-### Using Smithery (Recommended)
-
-The easiest way to install Obsidian GitHub MCP is using Smithery:
+Please update your installation to use the new package:
 
 ```bash
-# For Claude Desktop
-npx -y @smithery/cli install @Hint-Services/obsidian-github-mcp --client claude
-
-# For Cursor
-npx -y @smithery/cli install @Hint-Services/obsidian-github-mcp --client cursor
-
-# For Windsurf
-npx -y @smithery/cli install @Hint-Services/obsidian-github-mcp --client windsurf
-
-# For Cline
-npx -y @smithery/cli install @Hint-Services/obsidian-github-mcp --client cline
-```
-
-### Manual Installation
-
-```bash
+npm uninstall mcp-private-github-search
 npm install obsidian-github-mcp
 ```
 
-## Configuration
+### Update Your MCP Configuration
 
-Add the server to your MCP settings file with the following configuration:
+**Old configuration:**
+```json
+{
+  "mcpServers": {
+    "privateGithubSearch": {
+      "command": "npx",
+      "args": ["-y", "mcp-private-github-search"],
+      "env": {
+        "GITHUB_TOKEN": "your-token",
+        "GITHUB_OWNER": "your-owner",
+        "GITHUB_REPO": "your-repo"
+      }
+    }
+  }
+}
+```
 
+**New configuration:**
 ```json
 {
   "mcpServers": {
@@ -88,124 +38,98 @@ Add the server to your MCP settings file with the following configuration:
       "command": "npx",
       "args": ["-y", "obsidian-github-mcp"],
       "env": {
-        "GITHUB_TOKEN": "your-github-token",
-        "GITHUB_OWNER": "your-github-username",
-        "GITHUB_REPO": "your-obsidian-vault-repo"
+        "GITHUB_TOKEN": "your-token",
+        "GITHUB_OWNER": "your-owner",
+        "GITHUB_REPO": "your-repo"
       }
     }
   }
 }
 ```
 
-### Required Environment Variables
+## Why the Change?
 
-- `GITHUB_TOKEN`: Your GitHub personal access token ([create one here](https://github.com/settings/tokens))
+The package has been rebranded to better reflect its primary use case: **accessing GitHub repositories containing Obsidian vaults**. The new package offers:
+
+- ✅ Same functionality - no breaking changes
+- ✅ Better positioning for Obsidian users
+- ✅ Enhanced documentation and examples
+- ✅ Continued active development
+
+## New Package Details
+
+- **Package Name**: `obsidian-github-mcp`
+- **NPM**: https://www.npmjs.com/package/obsidian-github-mcp
+- **GitHub**: https://github.com/hint-services/obsidian-github-mcp
+- **Documentation**: Complete README with Obsidian-focused use cases
+
+## Deprecation Timeline
+
+- **Now**: This package is deprecated (but still functional)
+- **6 months**: Package will be archived
+- **Recommendation**: Migrate as soon as possible
+
+---
+
+## Legacy Documentation (For Reference Only)
+
+[![smithery badge](https://smithery.ai/badge/@Hint-Services/mcp-private-github-search)](https://smithery.ai/server/@Hint-Services/mcp-private-github-search)
+[![npm version](https://img.shields.io/npm/v/mcp-private-github-search)](https://www.npmjs.com/package/mcp-private-github-search)
+
+### MCP Private GitHub Search (DEPRECATED)
+
+A Model Context Protocol (MCP) server that provides tools for searching private GitHub repositories. 
+
+**⚠️ This package is deprecated. Please use [obsidian-github-mcp](https://www.npmjs.com/package/obsidian-github-mcp) instead.**
+
+#### Features
+
+- **GitHub Repository Search**: Search private GitHub repositories
+- **Type-Safe Implementation**: Written in TypeScript
+- **Input Validation**: Robust validation using Zod schemas
+- **Error Handling**: Graceful error handling
+
+#### Available Tools
+
+- **getFileContents**: Retrieves raw file content from repository
+- **searchFiles**: Searches files with GitHub code search syntax (paginated)
+- **searchIssues**: Searches repository issues
+- **getCommitHistory**: Retrieves commit history with optional diffs
+
+#### Installation (Not Recommended)
+
+```bash
+npm install mcp-private-github-search
+```
+
+**Please migrate to `obsidian-github-mcp` instead.**
+
+#### Configuration
+
+```json
+{
+  "mcpServers": {
+    "privateGithubSearch": {
+      "command": "npx",
+      "args": ["-y", "mcp-private-github-search"],
+      "env": {
+        "GITHUB_TOKEN": "your-token",
+        "GITHUB_OWNER": "your-owner", 
+        "GITHUB_REPO": "your-repo"
+      }
+    }
+  }
+}
+```
+
+#### Required Environment Variables
+
+- `GITHUB_TOKEN`: Your GitHub personal access token
 - `GITHUB_OWNER`: The owner/organization of the GitHub repository
-- `GITHUB_REPO`: The name of the repository containing your Obsidian vault
+- `GITHUB_REPO`: The name of the repository
 
-### GitHub Token Permissions
-
-Your GitHub token needs the following permissions:
-- `repo` (for private repositories) or `public_repo` (for public repositories)
-- `read:org` (if accessing organization repositories)
-
-## Example Workflows
-
-### Accessing Your Daily Notes
-
-```json
-{
-  "tool": "getFileContents",
-  "arguments": {
-    "filePath": "Daily Notes/2024-01-15.md"
-  }
-}
-```
-
-### Finding Research on a Topic
-
-```json
-{
-  "tool": "searchFiles",
-  "arguments": {
-    "query": "machine learning algorithms in:path",
-    "perPage": 10
-  }
-}
-```
-
-### Tracking Knowledge Evolution
-
-```json
-{
-  "tool": "getCommitHistory",
-  "arguments": {
-    "days": 30,
-    "includeDiffs": true,
-    "maxCommits": 10
-  }
-}
-```
-
-## Project Structure
-
-```
-obsidian-github-mcp/
-├── src/
-│   ├── index.ts          # Main MCP server entry point
-│   └── github/           # GitHub API integration
-│       ├── client.ts     # GitHub client implementation
-│       └── types.ts      # TypeScript type definitions
-├── docs/                 # Documentation
-├── package.json          # Project configuration
-└── tsconfig.json         # TypeScript configuration
-```
-
-## For Developers
-
-If you're interested in contributing to this project or developing your own tools with this server, please see the [Development Guide](docs/development.md).
-
-### Development Commands
-
-- `pnpm install` - Install dependencies
-- `pnpm run build` - Build the project
-- `pnpm run dev` - Run in development mode with inspector
-- `pnpm run inspector` - Launch MCP inspector for testing
-
-## Migration from mcp-private-github-search
-
-If you're migrating from the older `mcp-private-github-search` package:
-
-1. Update your package name in configuration:
-   ```json
-   {
-     "mcpServers": {
-       "obsidianGithub": {
-         "command": "npx",
-         "args": ["-y", "obsidian-github-mcp"]
-       }
-     }
-   }
-   ```
-
-2. The functionality remains the same - all existing tools work identically
-3. Consider the new Obsidian-focused use cases and workflows
-
-## Learn More
-
-For further information on the MCP ecosystem, refer to:
-
-- [Model Context Protocol Documentation](https://modelcontextprotocol.io): Detailed coverage of MCP architecture and design principles
-- [Smithery - MCP Server Registry](https://smithery.ai/docs): Guidelines for publishing MCP servers
-- [MCP TypeScript SDK Documentation](https://modelcontextprotocol.io/typescript): Comprehensive TypeScript SDK documentation
-- [Obsidian](https://obsidian.md): The knowledge management app that inspired this tool
+---
 
 ## About Hint Services
 
-> "The future is already here, it's just unevenly distributed"
->
-> — William Gibson, Author
-
-Hint Services is a boutique consultancy with a mission to develop and expand how user interfaces leverage artificial intelligence technology. We architect ambition at the intersection of AI and User Experience, founded and led by Ben Hofferber.
-
-We offer specialized AI workshops for design teams looking to embrace AI tools without becoming developers. [Learn more about our training and workshops](https://hint.services/training-workshops).
+Hint Services is a boutique consultancy focused on AI and User Experience. [Learn more](https://hint.services).

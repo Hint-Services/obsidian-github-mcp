@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-github-mcp",
-  "version": "0.2.0",
-  "description": "A Model Context Protocol server for accessing GitHub repositories containing Obsidian vaults",
+  "name": "mcp-private-github-search",
+  "version": "0.2.1",
+  "description": "[DEPRECATED] Please use 'obsidian-github-mcp' instead. A Model Context Protocol server for private GitHub search.",
   "author": {
     "name": "Ben Hofferber",
     "url": "https://hint.services",
@@ -12,7 +12,7 @@
   "private": false,
   "type": "module",
   "bin": {
-    "obsidian-github-mcp": "build/index.js"
+    "mcp-private-github-search": "build/index.js"
   },
   "files": [
     "build"
@@ -32,8 +32,8 @@
     "lint:fix": "biome check --apply ./src",
     "format": "biome format ./src",
     "format:fix": "biome format --write ./src",
-    "smithery:build": "docker build -t obsidian-github-mcp -f Dockerfile.smithery .",
-    "smithery:run": "docker run -i --rm obsidian-github-mcp"
+    "smithery:build": "docker build -t mcp-private-github-search -f Dockerfile.smithery .",
+    "smithery:run": "docker run -i --rm mcp-private-github-search"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.9.0",
@@ -53,10 +53,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hint-services/obsidian-github-mcp.git"
+    "url": "git+https://github.com/hint-services/mcp-private-github-search.git"
   },
   "bugs": {
-    "url": "https://github.com/hint-services/obsidian-github-mcp/issues"
+    "url": "https://github.com/hint-services/mcp-private-github-search/issues"
   },
-  "homepage": "https://github.com/hint-services/obsidian-github-mcp#readme"
+  "homepage": "https://github.com/hint-services/mcp-private-github-search#readme"
 }
