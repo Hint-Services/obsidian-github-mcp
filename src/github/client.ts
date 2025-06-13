@@ -135,18 +135,21 @@ export class GithubClient {
 
             // Determine why this file matched
             let matchReason = "";
-            if (
-              searchIn === "filename" ||
-              fileName.toLowerCase().includes(query.toLowerCase())
-            ) {
+            if (searchIn === "filename") {
               matchReason = "📝 filename match";
-            } else if (
-              searchIn === "path" ||
-              filePath.toLowerCase().includes(query.toLowerCase())
-            ) {
+            } else if (searchIn === "path") {
               matchReason = "📁 path match";
-            } else {
+            } else if (searchIn === "content") {
               matchReason = "📄 content match";
+            } else {
+              // searchIn is 'all', so we deduce the reason
+              if (fileName.toLowerCase().includes(query.toLowerCase())) {
+                matchReason = "📝 filename match";
+              } else if (filePath.toLowerCase().includes(query.toLowerCase())) {
+                matchReason = "📁 path match";
+              } else {
+                matchReason = "📄 content match";
+              }
             }
 
             return `- **${fileName}** (${filePath}) ${matchReason}`;
