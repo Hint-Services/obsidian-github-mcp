@@ -5,6 +5,10 @@
 
 A Model Context Protocol (MCP) server that connects AI assistants to GitHub repositories containing Obsidian vaults. This server enables seamless integration with your knowledge base stored on GitHub, allowing AI assistants to read, search, and analyze your Obsidian notes and documentation.
 
+<a href="https://glama.ai/mcp/servers/@Hint-Services/obsidian-github-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@Hint-Services/obsidian-github-mcp/badge" alt="Obsidian GitHub MCP server" />
+</a>
+
 ## Why This Tool?
 
 Many Obsidian users store their vaults in GitHub for backup, versioning, and collaboration. This MCP server bridges the gap between your GitHub-hosted Obsidian vault and AI assistants, enabling:
