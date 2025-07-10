@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/hint-services-obsidian-github-mcp-badge.png)](https://mseep.ai/app/hint-services-obsidian-github-mcp)
+
 [![smithery badge](https://smithery.ai/badge/@Hint-Services/obsidian-github-mcp)](https://smithery.ai/server/@Hint-Services/obsidian-github-mcp)
 [![npm version](https://img.shields.io/npm/v/obsidian-github-mcp)](https://www.npmjs.com/package/obsidian-github-mcp)
 
