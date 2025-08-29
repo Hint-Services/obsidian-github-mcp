@@ -2,40 +2,6 @@
 
 name: "@Hint-Services/obsidian-github-mcp"
 description: "A TypeScript-based Model Context Protocol (MCP) server for accessing GitHub repositories containing Obsidian vaults"
-version: "0.3.0"
+version: "0.4.0"
 
-startCommand:
-  type: stdio
-  configSchema:
-    type: object
-    title: "Obsidian GitHub MCP Configuration"
-    description: "Configuration options for the Obsidian GitHub MCP server"
-    properties:
-      githubToken:
-        type: string
-        description: "Your GitHub token (get from https://github.com/settings/tokens)"
-      githubOwner:
-        type: string
-        description: "The owner of the GitHub repository"
-      githubRepo:
-        type: string
-        description: "The name of the GitHub repository"
-    required: ["githubToken", "githubOwner", "githubRepo"]
-  commandFunction: |-
-    (config) => ({
-      command: 'node',
-      args: ['build/index.js'],
-      env: {
-        NODE_ENV: 'production',
-        GITHUB_TOKEN: config.githubToken || '',
-        GITHUB_OWNER: config.githubOwner || '',
-        GITHUB_REPO: config.githubRepo || '',
-      }
-    })
-
-clients:
-  - claude
-  - cursor
-  - windsurf
-  - cline
-  - typescript
+runtime: "typescript"

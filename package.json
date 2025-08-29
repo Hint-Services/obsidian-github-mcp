@@ -1,6 +1,6 @@
 {
   "name": "obsidian-github-mcp",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A Model Context Protocol server for accessing GitHub repositories containing Obsidian vaults",
   "author": {
     "name": "Ben Hofferber",
@@ -17,30 +17,36 @@
   "files": [
     "build"
   ],
+  "module": "src/index.ts",
   "scripts": {
     "prebuild": "npm run lint && npm run format",
-    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "prepublishOnly": "npm run build:stdio",
+    "build": "npm run build:http",
+    "build:stdio": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "build:http": "npx @smithery/cli build",
     "watch": "tsc --watch",
     "inspector": "npx @modelcontextprotocol/inspector node build/index.js",
-    "dev": "concurrently \"npm run watch\" \"npm run inspector\"",
+    "dev": "npx @smithery/cli dev",
+    "dev:stdio": "concurrently \"npm run watch\" \"npm run inspector\"",
     "debug": "node --inspect build/index.js",
     "debug:watch": "concurrently \"npm run watch\" \"npm run debug\"",
     "logs": "tail -n 20 -F ~/Library/Logs/Claude/mcp*.log",
     "clean": "rm -rf build",
-    "start": "node build/index.js",
+    "start": "npm run start:http",
+    "start:http": "node .smithery/index.cjs",
+    "start:stdio": "node build/index.js",
     "test": "vitest",
     "lint": "biome check ./src",
     "lint:fix": "biome check --apply ./src",
     "format": "biome format ./src",
-    "format:fix": "biome format --write ./src",
-    "smithery:build": "docker build -t obsidian-github-mcp -f Dockerfile.smithery .",
-    "smithery:run": "docker run -i --rm obsidian-github-mcp"
+    "format:fix": "biome format --write ./src"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.9.0",
+    "@modelcontextprotocol/sdk": "1.17.4",
     "@octokit/rest": "^21.1.1",
-    "@smithery/sdk": "latest",
+    "@smithery/sdk": "1.5.6",
     "axios": "^1.8.4",
+    "tsx": "^4.20.5",
     "zod": "^3.24.2"
   },
   "devDependencies": {

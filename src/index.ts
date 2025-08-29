@@ -16,6 +16,7 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
 import { GithubClient } from "./github/client.js";
 
 // Read GitHub config from environment variables
@@ -29,22 +30,36 @@ if (!githubToken || !owner || !repo) {
   );
 }
 
-// Create GithubClient with full config
-const githubClient = new GithubClient({ githubToken, owner, repo });
-
-/**
- * Create a new MCP server instance with full capabilities
- */
-const server = new McpServer({
-  name: "obsidian-github-mcp",
-  version: "0.3.0",
-  capabilities: {
-    tools: {},
-    resources: {},
-    prompts: {},
-    streaming: true,
-  },
+export const configSchema = z.object({
+  githubToken: z.string().describe("GitHub API token"),
+  owner: z.string().describe("GitHub repository owner"),
+  repo: z.string().describe("GitHub repository name"),
 });
+
+export default function createServer({
+  config,
+}: {
+  config: z.infer<typeof configSchema>;
+}) {
+  /**
+   * Create a new MCP server instance with full capabilities
+   */
+  const server = new McpServer({
+    name: "obsidian-github-mcp",
+    version: "0.4.0",
+    capabilities: {
+      tools: {},
+      resources: {},
+      prompts: {},
+      streaming: true,
+    },
+  });
+
+  const githubClient = new GithubClient(config);
+  githubClient.registerGithubTools(server);
+
+  return server;
+}
 
 /**
  * Helper function to send log messages to the client
@@ -54,55 +69,23 @@ function logMessage(level: "info" | "warn" | "error", message: string) {
 }
 
 /**
- * Set up error handling for the server
- */
-process.on("uncaughtException", (error: Error) => {
-  logMessage("error", `Uncaught error: ${error.message}`);
-  console.error("Server error:", error);
-});
-
-// Register GitHub tools
-try {
-  githubClient.registerGithubTools(server);
-  logMessage("info", "Successfully registered all tools");
-} catch (error) {
-  logMessage(
-    "error",
-    `Failed to register tools: ${
-      error instanceof Error ? error.message : "Unknown error"
-    }`
-  );
-  process.exit(1);
-}
-
-/**
- * Set up proper cleanup on process termination
- */
-async function cleanup() {
-  try {
-    await server.close();
-    logMessage("info", "Server shutdown completed");
-  } catch (error) {
-    logMessage(
-      "error",
-      `Error during shutdown: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`
-    );
-  } finally {
-    process.exit(0);
-  }
-}
-
-// Handle termination signals
-process.on("SIGTERM", cleanup);
-process.on("SIGINT", cleanup);
-
-/**
  * Main server startup function
  */
 async function main() {
   try {
+    // Read GitHub config from environment variables
+    const githubToken = process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_OWNER;
+    const repo = process.env.GITHUB_REPO;
+
+    const server = createServer({
+      config: {
+        githubToken: githubToken || "",
+        owner: owner || "",
+        repo: repo || "",
+      },
+    });
+
     // Set up communication with the MCP host using stdio transport
     const transport = new StdioServerTransport();
     await server.connect(transport);
