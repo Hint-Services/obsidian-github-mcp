@@ -19,17 +19,6 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { GithubClient } from "./github/client.js";
 
-// Read GitHub config from environment variables
-const githubToken = process.env.GITHUB_TOKEN;
-const owner = process.env.GITHUB_OWNER;
-const repo = process.env.GITHUB_REPO;
-
-if (!githubToken || !owner || !repo) {
-  throw new Error(
-    "Environment variables GITHUB_TOKEN, GITHUB_OWNER, and GITHUB_REPO are required"
-  );
-}
-
 export const configSchema = z.object({
   githubToken: z.string().describe("GitHub API token"),
   owner: z.string().describe("GitHub repository owner"),
