@@ -78,6 +78,12 @@ async function main() {
     const owner = process.env.GITHUB_OWNER;
     const repo = process.env.GITHUB_REPO;
 
+    if (!githubToken || !owner || !repo) {
+      throw new Error(
+        "Environment variables GITHUB_TOKEN, GITHUB_OWNER, and GITHUB_REPO are required"
+      );
+    }
+
     const server = createServer({
       config: {
         githubToken: githubToken || "",
