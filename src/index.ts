@@ -46,6 +46,8 @@ export default function createServer({
 
   const githubClient = new GithubClient(config);
   githubClient.registerGithubTools(server);
+  githubClient.registerGithubPrompts(server);
+  githubClient.registerGithubResources(server);
 
   return server;
 }
@@ -62,22 +64,25 @@ function logMessage(level: "info" | "warn" | "error", message: string) {
  */
 async function main() {
   try {
-    // Read GitHub config from environment variables
-    const githubToken = process.env.GITHUB_TOKEN;
-    const owner = process.env.GITHUB_OWNER;
-    const repo = process.env.GITHUB_REPO;
+    // Read GitHub config from environment variables (all optional)
+    const githubToken = process.env.GITHUB_TOKEN || "";
+    const owner = process.env.GITHUB_OWNER || "";
+    const repo = process.env.GITHUB_REPO || "";
 
+    // Server starts without required configuration
+    // Configuration can be provided via environment variables or set later
     if (!githubToken || !owner || !repo) {
-      console.error(
-        "Environment variables GITHUB_TOKEN, GITHUB_OWNER, and GITHUB_REPO are required for STDIO transport"
+      logMessage(
+        "info",
+        "Starting server without full GitHub configuration. Tools will require GITHUB_TOKEN, GITHUB_OWNER, and GITHUB_REPO environment variables to function."
       );
     }
 
     const server = createServer({
       config: {
-        githubToken: githubToken || "",
-        owner: owner || "",
-        repo: repo || "",
+        githubToken,
+        owner,
+        repo,
       },
     });
 

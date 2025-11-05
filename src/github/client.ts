@@ -13,10 +13,20 @@ export class GithubClient {
     });
   }
 
+  // Check if configuration is complete
+  private checkConfig(): void {
+    if (!this.config.githubToken || !this.config.owner || !this.config.repo) {
+      throw new Error(
+        `GitHub configuration incomplete. Please set GITHUB_TOKEN, GITHUB_OWNER, and GITHUB_REPO environment variables. Current config: token=${this.config.githubToken ? "set" : "missing"}, owner=${this.config.owner || "missing"}, repo=${this.config.repo || "missing"}`
+      );
+    }
+  }
+
   // Simplified error handler for Octokit requests
   private async handleRequest<T>(
     request: () => Promise<{ data: T }>
   ): Promise<T> {
+    this.checkConfig(); // Ensure config is complete before making requests
     try {
       const { data } = await request();
       return data;
@@ -161,6 +171,231 @@ export class GithubClient {
     };
   }
 
+  registerGithubResources(server: McpServer) {
+    // Resource for repository information
+    server.resource(
+      "repo-info",
+      `obsidian://vault/${this.config.owner}/${this.config.repo}/info`,
+      {
+        description: "Basic information about your Obsidian vault repository",
+        mimeType: "application/json",
+      },
+      async (uri) => {
+        try {
+          const repoInfo = await this.handleRequest(async () => {
+            return this.octokit.repos.get({
+              owner: this.config.owner,
+              repo: this.config.repo,
+            });
+          });
+
+          const info = {
+            name: repoInfo.name,
+            fullName: repoInfo.full_name,
+            description: repoInfo.description,
+            isPrivate: repoInfo.private,
+            defaultBranch: repoInfo.default_branch,
+            size: `${(repoInfo.size / 1024).toFixed(2)} MB`,
+            createdAt: repoInfo.created_at,
+            updatedAt: repoInfo.updated_at,
+            language: repoInfo.language,
+            topics: repoInfo.topics || [],
+            htmlUrl: repoInfo.html_url,
+          };
+
+          return {
+            contents: [
+              {
+                uri: uri.toString(),
+                mimeType: "application/json",
+                text: JSON.stringify(info, null, 2),
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            contents: [
+              {
+                uri: uri.toString(),
+                mimeType: "text/plain",
+                text: `Error fetching repository information: ${
+                  error instanceof Error ? error.message : String(error)
+                }`,
+              },
+            ],
+          };
+        }
+      }
+    );
+
+    // Resource for recent activity summary
+    server.resource(
+      "recent-activity",
+      `obsidian://vault/${this.config.owner}/${this.config.repo}/activity`,
+      {
+        description: "Summary of recent commits and changes to your vault",
+        mimeType: "text/markdown",
+      },
+      async (uri) => {
+        try {
+          const since = new Date();
+          since.setDate(since.getDate() - 7); // Last 7 days
+
+          const commits = await this.handleRequest(async () => {
+            return this.octokit.repos.listCommits({
+              owner: this.config.owner,
+              repo: this.config.repo,
+              since: since.toISOString(),
+              per_page: 10,
+            });
+          });
+
+          let markdown = `# Recent Activity - ${this.config.owner}/${this.config.repo}\n\n`;
+          markdown += "Last 7 days of commits:\n\n";
+
+          if (commits.length === 0) {
+            markdown += "_No commits in the last 7 days_\n";
+          } else {
+            for (const commit of commits) {
+              const date = new Date(
+                commit.commit.author?.date || ""
+              ).toLocaleDateString();
+              const message = commit.commit.message.split("\n")[0];
+              const author = commit.commit.author?.name || "Unknown";
+              markdown += `- **${date}**: ${message} _(by ${author})_\n`;
+            }
+          }
+
+          return {
+            contents: [
+              {
+                uri: uri.toString(),
+                mimeType: "text/markdown",
+                text: markdown,
+              },
+            ],
+          };
+        } catch (error) {
+          return {
+            contents: [
+              {
+                uri: uri.toString(),
+                mimeType: "text/plain",
+                text: `Error fetching recent activity: ${
+                  error instanceof Error ? error.message : String(error)
+                }`,
+              },
+            ],
+          };
+        }
+      }
+    );
+  }
+
+  registerGithubPrompts(server: McpServer) {
+    // Prompt to explore vault structure and recent activity
+    server.prompt(
+      "explore-vault",
+      "Explore your Obsidian vault structure, recent changes, and key content",
+      {},
+      async () => {
+        return {
+          description: "Comprehensive exploration of your Obsidian vault",
+          messages: [
+            {
+              role: "user" as const,
+              content: {
+                type: "text" as const,
+                text: `Please help me explore my Obsidian vault in the GitHub repository ${this.config.owner}/${this.config.repo}.
+
+I'd like to understand:
+1. What types of notes and content are in my vault
+2. Recent changes and updates (last 7 days)
+3. Key topics or themes in my notes
+4. Overall structure and organization
+
+Please use the available tools to:
+- Search for markdown files to understand the content types
+- Check recent commit history to see what's been updated
+- Suggest ways to better organize or explore my knowledge base`,
+              },
+            },
+          ],
+        };
+      }
+    );
+
+    // Prompt to search for specific topics
+    server.prompt(
+      "find-notes-about",
+      "Search your vault for notes related to a specific topic",
+      {
+        topic: z.string().describe("The topic or keyword to search for"),
+      },
+      async ({ topic }) => {
+        return {
+          description: `Search vault for notes about: ${topic}`,
+          messages: [
+            {
+              role: "user" as const,
+              content: {
+                type: "text" as const,
+                text: `Please search my Obsidian vault (${this.config.owner}/${this.config.repo}) for notes related to "${topic}".
+
+Use the searchFiles tool to:
+1. Find files with "${topic}" in the filename
+2. Search for "${topic}" in file contents
+3. Look for related terms or concepts
+
+Then provide:
+- A summary of what you found
+- Key insights from the most relevant notes
+- Suggestions for related topics to explore`,
+              },
+            },
+          ],
+        };
+      }
+    );
+
+    // Prompt to analyze knowledge base evolution
+    server.prompt(
+      "analyze-recent-changes",
+      "Analyze how your knowledge base has evolved recently",
+      {
+        days: z
+          .string()
+          .optional()
+          .describe("Number of days to look back (default: 7)"),
+      },
+      async ({ days }) => {
+        const daysNum = days ? Number.parseInt(days, 10) : 7;
+        return {
+          description: `Analyze vault changes over the last ${daysNum} days`,
+          messages: [
+            {
+              role: "user" as const,
+              content: {
+                type: "text" as const,
+                text: `Please analyze how my Obsidian vault (${this.config.owner}/${this.config.repo}) has evolved over the last ${daysNum} days.
+
+Use the getCommitHistory tool to:
+1. Review all commits from the last ${daysNum} days
+2. Identify which notes were created, modified, or deleted
+3. Analyze the types of changes (new topics, updates to existing notes, etc.)
+
+Then provide:
+- A summary of the main themes or topics you've been working on
+- Patterns in your note-taking or knowledge development
+- Suggestions for areas that might need more attention or organization`,
+              },
+            },
+          ],
+        };
+      }
+    );
+  }
+
   registerGithubTools(server: McpServer) {
     server.tool(
       "getFileContents",
@@ -169,6 +404,12 @@ export class GithubClient {
         filePath: z
           .string()
           .describe("Path to the file within the repository."),
+      },
+      {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
       },
       async ({ filePath }) => {
         const fileContent = await this.handleRequest(async () => {
@@ -223,6 +464,12 @@ export class GithubClient {
           .optional()
           .default(100)
           .describe("Number of results per page"),
+      },
+      {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
       },
       async ({ query, searchIn = "all", page = 0, perPage = 100 }) => {
         // Empty query is allowed - useful for listing files
@@ -356,6 +603,12 @@ export class GithubClient {
           .string()
           .describe("Search query (uses GitHub Issue Search syntax)"),
       },
+      {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
       async ({ query }) => {
         const repoQualifier = `repo:${this.config.owner}/${this.config.repo}`;
         const qualifiedQuery = `${query} is:issue ${repoQualifier}`;
@@ -413,6 +666,12 @@ export class GithubClient {
           .optional()
           .default(0)
           .describe("Page number for pagination (0-indexed)"),
+      },
+      {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
       },
       async ({
         days,
@@ -547,6 +806,12 @@ export class GithubClient {
       "diagnoseSearch",
       `Diagnose search functionality and repository configuration for your Obsidian vault on GitHub (${this.config.owner}/${this.config.repo}). Verifies repository connectivity, search capabilities, and checks if repository size is within GitHub's indexing limits.`,
       {},
+      {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
       async () => {
         try {
           // Get repository information

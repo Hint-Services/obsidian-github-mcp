@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4c1d95;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#grad1)" />
+
+  <!-- Document/Note icon (Obsidian representation) -->
+  <rect x="140" y="140" width="180" height="232" rx="12" fill="#ffffff" opacity="0.95"/>
+  <line x1="170" y1="180" x2="290" y2="180" stroke="#7c3aed" stroke-width="8" stroke-linecap="round"/>
+  <line x1="170" y1="220" x2="290" y2="220" stroke="#7c3aed" stroke-width="8" stroke-linecap="round"/>
+  <line x1="170" y1="260" x2="260" y2="260" stroke="#7c3aed" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- GitHub-style branching connection -->
+  <g opacity="0.9">
+    <circle cx="380" cy="180" r="28" fill="#ffffff" stroke="#7c3aed" stroke-width="6"/>
+    <circle cx="380" cy="280" r="28" fill="#ffffff" stroke="#7c3aed" stroke-width="6"/>
+    <circle cx="380" cy="380" r="28" fill="#ffffff" stroke="#7c3aed" stroke-width="6"/>
+    <line x1="380" y1="208" x2="380" y2="252" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+    <line x1="380" y1="308" x2="380" y2="352" stroke="#ffffff" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Connection line from document to git nodes -->
+  <line x1="320" y1="256" x2="352" y2="256" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.8"/>
+  <path d="M 352 256 Q 366 256, 366 270 L 366 280" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.8"/>
+</svg>
