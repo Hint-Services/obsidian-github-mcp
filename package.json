@@ -1,6 +1,6 @@
 {
   "name": "obsidian-github-mcp",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A Model Context Protocol server for accessing GitHub repositories containing Obsidian vaults",
   "license": "MIT",
   "author": {
