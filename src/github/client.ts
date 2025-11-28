@@ -340,7 +340,7 @@ Please use the available tools to:
               role: "user" as const,
               content: {
                 type: "text" as const,
-                text: `Please search my Obsidian vault (${this.config.owner}/${this.config.repo}) for notes related to "${topic}".
+                text: `Please search my Obsidian vault for notes related to "${topic}".
 
 Use the searchFiles tool to:
 1. Find files with "${topic}" in the filename
@@ -377,7 +377,7 @@ Then provide:
               role: "user" as const,
               content: {
                 type: "text" as const,
-                text: `Please analyze how my Obsidian vault (${this.config.owner}/${this.config.repo}) has evolved over the last ${daysNum} days.
+                text: `Please analyze how my Obsidian vault has evolved over the last ${daysNum} days.
 
 Use the getCommitHistory tool to:
 1. Review all commits from the last ${daysNum} days
@@ -399,7 +399,7 @@ Then provide:
   registerGithubTools(server: McpServer) {
     server.tool(
       "getFileContents",
-      `Retrieve the contents of a specific note, document, or file from your Obsidian vault stored in GitHub (${this.config.owner}/${this.config.repo}). Perfect for accessing your knowledge base content.`,
+      `Retrieve the contents of a specific note, document, or file from your Obsidian vault stored in GitHub. Perfect for accessing your knowledge base content.`,
       {
         filePath: z
           .string()
@@ -440,7 +440,7 @@ Then provide:
     // Enhanced searchFiles tool with filename and content search
     server.tool(
       "searchFiles",
-      `Search for notes, documents, and files within your Obsidian vault on GitHub (${this.config.owner}/${this.config.repo}). Find specific knowledge base content using GitHub's powerful search syntax. Supports searching in filenames, paths, and content.`,
+      `Search for notes, documents, and files within your Obsidian vault on GitHub. Find specific knowledge base content using GitHub's powerful search syntax. Supports searching in filenames, paths, and content.`,
       {
         query: z
           .string()
@@ -597,7 +597,7 @@ Then provide:
     // Placeholder for searchIssues tool
     server.tool(
       "searchIssues",
-      `Search for issues and discussions in your Obsidian vault repository (${this.config.owner}/${this.config.repo}). Great for tracking tasks, project management, and collaborative knowledge work.`,
+      `Search for issues and discussions in your Obsidian vault repository. Great for tracking tasks, project management, and collaborative knowledge work.`,
       {
         query: z
           .string()
@@ -636,7 +636,7 @@ Then provide:
     // getCommitHistory tool - focuses on file changes and diffs
     server.tool(
       "getCommitHistory",
-      `Track the evolution of your Obsidian vault knowledge base by retrieving commit history from GitHub (${this.config.owner}/${this.config.repo}). See how your notes and ideas have developed over time with detailed diffs.`,
+      `Track the evolution of your Obsidian vault knowledge base by retrieving commit history from GitHub. See how your notes and ideas have developed over time with detailed diffs.`,
       {
         days: z
           .number()
@@ -804,7 +804,7 @@ Then provide:
     // diagnoseSearch tool for repository diagnostics
     server.tool(
       "diagnoseSearch",
-      `Diagnose search functionality and repository configuration for your Obsidian vault on GitHub (${this.config.owner}/${this.config.repo}). Verifies repository connectivity, search capabilities, and checks if repository size is within GitHub's indexing limits.`,
+      `Diagnose search functionality and repository configuration for your Obsidian vault on GitHub. Verifies repository connectivity, search capabilities, and checks if repository size is within GitHub's indexing limits.`,
       {},
       {
         readOnlyHint: true,
